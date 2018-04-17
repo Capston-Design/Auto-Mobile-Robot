@@ -1,0 +1,8 @@
+<launch>
+    <node name="uvc_camera" pkg="uvc_camera" type="uvc_camera_node" />
+    <group ns="rqt">
+        <node name="rqt_graph" pkg="rqt_graph" type="rqt_graph" />
+        <node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" />
+    </group>
+    <node name="ImageCollecting" pkg="ImageCollecting_Node" type="imagecollecting_node.py" output="screen"/>
+</launch>
