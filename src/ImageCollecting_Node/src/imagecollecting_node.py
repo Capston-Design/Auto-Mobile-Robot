@@ -15,7 +15,7 @@ class ImageCollector:
         self.roi_msg = ROI()
 
         self.path = '/home/seopaul/Capston-Design/Auto-Mobile-Robot/src/ImageCollecting_Node/data'
-        self.save_flag = False 
+        self.save_flag = False
         self.file_count = 0
 
     def roi_crop(self, image, height, width):
@@ -31,11 +31,10 @@ class ImageCollector:
     def cb_image_receive(self, msg):
         try:
             cv2_img = self.cvb.imgmsg_to_cv2(msg, "bgr8")
-            cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2GRAY)
         except CvBridgeError, e:
             print(e)
         else:
-            height, width = cv2_img.shape
+            height, width, __ = cv2_img.shape
             road = self.roi_crop(cv2_img, (height - 200, height - 100), (0, width))
             sign = self.roi_crop(cv2_img, (height - 400, height - 200), (0, width))
             img_list = [road, sign]
@@ -49,7 +48,7 @@ class ImageCollector:
 
     def pb_image(self, img_list):
         for i in range(2):
-            img_list[i] = self.cvb.cv2_to_imgmsg(img_list[i], encoding="passthrough")
+            img_list[i] = self.cvb.cv2_to_imgmsg(img_list[i], encoding="bgr8")
         self.roi_msg.road_image = img_list[0]
         self.roi_msg.sign_image = img_list[1]
         self.pub_image_roi.publish(self.roi_msg)
