@@ -1,0 +1,6 @@
+sensor_msgs/Image sign_img
+---
+string result
+---
+string status
+uint32 detect_num
