@@ -51,7 +51,6 @@ find_package(catkin REQUIRED COMPONENTS
 add_action_files(
   DIRECTORY action
   FILES
-  DetectLane.action
   DetectSign.action
 )
 

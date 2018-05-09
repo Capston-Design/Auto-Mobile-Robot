@@ -1,5 +1,0 @@
-sensor_msgs/Image road_img
----
-sensor_msgs/Image result_img
----
-string result

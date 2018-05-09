@@ -1,4 +1,4 @@
 (cl:in-package ImageProcessing_Node-msg)
-(cl:export '(RESULT-VAL
-          RESULT
+(cl:export '(STATUS-VAL
+          STATUS
 ))

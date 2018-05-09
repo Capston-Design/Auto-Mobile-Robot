@@ -14,8 +14,8 @@ class ImageCollector:
         self.cvb = CvBridge()
         self.roi_msg = ROI()
 
-        self.path = '/home/seopaul/Capston-Design/Auto-Mobile-Robot/src/ImageCollecting_Node/data'
-        self.save_flag = False
+        self.path = '/home/seopaul/Auto-Mobile-Robot/src/ImageCollecting_Node/data'
+        self.save_flag = True 
         self.file_count = 0
 
     def roi_crop(self, image, height, width):
@@ -40,7 +40,7 @@ class ImageCollector:
             img_list = [road, sign]
 
             if self.save_flag is True:
-                if self.file_count % 100 == 0:
+                if self.file_count %  5 == 0:
                     self.cb_image_save(img_list)
                     self.file_count = 0
                 self.file_count += 1
