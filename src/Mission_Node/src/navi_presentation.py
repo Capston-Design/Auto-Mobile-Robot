@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-
 from find_object_2d.msg import ObjectsStamped
-import rospy, math
+import rospy
+import math
 import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+
 
 class imageprocess:
     def __init__(self):
