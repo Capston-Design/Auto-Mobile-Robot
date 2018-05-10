@@ -1,8 +1,8 @@
 
 "use strict";
 
-let Detect = require('./Detect.js')
+let DetectLane = require('./DetectLane.js')
 
 module.exports = {
-  Detect: Detect,
+  DetectLane: DetectLane,
 };

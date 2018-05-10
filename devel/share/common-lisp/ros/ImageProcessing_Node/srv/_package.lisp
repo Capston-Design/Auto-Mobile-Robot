@@ -1,10 +1,10 @@
 (cl:defpackage ImageProcessing_Node-srv
   (:use )
   (:export
-   "DETECT"
-   "<DETECT-REQUEST>"
-   "DETECT-REQUEST"
-   "<DETECT-RESPONSE>"
-   "DETECT-RESPONSE"
+   "DETECTLANE"
+   "<DETECTLANE-REQUEST>"
+   "DETECTLANE-REQUEST"
+   "<DETECTLANE-RESPONSE>"
+   "DETECTLANE-RESPONSE"
   ))
 

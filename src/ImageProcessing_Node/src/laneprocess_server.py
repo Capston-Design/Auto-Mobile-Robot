@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*-coding:utf-8-*-
-from ImageProcessing_Node.src.image_processor import ImageProcessor
+from image_processor import ImageProcessor
 from std_msgs.msg import Float32
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import Twist
 from cv_bridge import CvBridge
 import numpy as np
 import cv2
@@ -13,7 +12,6 @@ import rospy
 class LaneProcessServer:
     def __init__(self):
         self.bridge = CvBridge()
-        self.twist = Twist()
         self.ip = ImageProcessor()
 
         self.is_perspective = True
@@ -26,8 +24,8 @@ class LaneProcessServer:
         self.list_right_pts_x, self.list_right_pts_y = [], []
         self.list_left_pts_x, self.list_left_pts_y = [], []
 
-        self.image_sub = rospy.Subscriber('/image_raw', Image, self.image_callback)
-        self.error_pub = rospy.Publisher('error', Float32, queue_size=1)
+        self.image_sub = rospy.Subscriber('/image/controller/lane', Image, self.image_callback)
+        self.error_pub = rospy.Publisher('/error/image_processor/lane', Float32, queue_size=1)
 
     def init_list_pts(self):
         self.list_right_pts_x = []

@@ -1,8 +1,13 @@
 <launch>
-    <node name="uvc_camera" pkg="uvc_camera" type="uvc_camera_node" />
+    <node name="UVC_Camera" pkg="uvc_camera" type="uvc_camera_node" />
+    <node name="ImageCollector" pkg="ImageCollecting_Node" type="imagecollecting_node.py" />
+    <node name="Controller" pkg="Control_Node" type="control_node.py" />
+    <group ns="ImageProcessor">
+        <node name="SignProcessServer" pkg="ImageProcessing_Node" type="signprocess_server.py" />
+        <node name="LaneProcessServer" pkg="ImageProcessing_Node" type="laneprocess_server.py" />
+    </group>
     <group ns="rqt">
         <node name="rqt_graph" pkg="rqt_graph" type="rqt_graph" />
         <node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" />
     </group>
-    <node name="ImageCollecting" pkg="ImageCollecting_Node" type="imagecollecting_node.py" output="screen"/>
 </launch>

@@ -9,8 +9,8 @@ import cv2
 
 class ImageCollector:
     def __init__(self):
-        self.sub_image_raw = rospy.Subscriber('image_raw', Image, self.cb_image_receive, queue_size=1)
-        self.pub_image_roi = rospy.Publisher('image_roi', ROI, queue_size=1)
+        self.sub_image_raw = rospy.Subscriber('/image_raw', Image, self.cb_image_receive, queue_size=1)
+        self.pub_image_roi = rospy.Publisher('/image/image_collector/roi', ROI, queue_size=1)
         self.cvb = CvBridge()
         self.roi_msg = ROI()
 
@@ -18,7 +18,8 @@ class ImageCollector:
         self.save_flag = True 
         self.file_count = 0
 
-    def roi_crop(self, image, height, width):
+    @staticmethod
+    def roi_crop(image, height, width):
         crop_image = image[height[0]:height[1], width[0]:width[1]]
         return crop_image
 
@@ -53,7 +54,8 @@ class ImageCollector:
         self.roi_msg.sign_image = img_list[1]
         self.pub_image_roi.publish(self.roi_msg)
 
-    def main(self):
+    @staticmethod
+    def main():
         rospy.spin()
 
 if __name__ == '__main__':

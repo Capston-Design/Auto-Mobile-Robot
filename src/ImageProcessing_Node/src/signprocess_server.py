@@ -27,7 +27,7 @@ class SignProcessServer:
 
         # 외부에서 이미지를 받아오는 설정
         self.cvb = CvBridge()
-        self.act_sign = actionlib.SimpleActionServer('detect_sign', DetectSignAction, self.do_goal, False)
+        self.act_sign = actionlib.SimpleActionServer('/image/controller/sign', DetectSignAction, self.do_goal, False)
         self.act_sign.start()
 
     def do_goal(self, goal):
