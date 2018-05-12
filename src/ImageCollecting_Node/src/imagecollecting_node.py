@@ -7,16 +7,24 @@ import rospy
 import cv2
 
 
-class ImageCollector:
+class ImageCollectingNode:
     def __init__(self):
-        self.sub_image_raw = rospy.Subscriber('/image_raw', Image, self.cb_image_receive, queue_size=1)
-        self.pub_image_roi = rospy.Publisher('/image/image_collector/roi', ROI, queue_size=1)
-        self.cvb = CvBridge()
-        self.roi_msg = ROI()
+        self.path = self.fn_load()
 
-        self.path = '/home/seopaul/Auto-Mobile-Robot/src/ImageCollecting_Node/data'
-        self.save_flag = True 
+        self.save_flag = False
         self.file_count = 0
+
+        self.cvb = CvBridge()
+        self.msg_roi = ROI()
+
+        self.pub_img_roi = rospy.Publisher('/image/image_collector/roi', ROI, queue_size=1)
+        self.sub_img_raw = rospy.Subscriber('/image_raw', Image, self.cb_image_receive, queue_size=1)
+
+    @staticmethod
+    def fn_load():
+        dir_path = os.path.realpath(os.path.dirname(__file__))
+        dir_path = dir_path.replace('ImageCollecting_Node/src', 'ImageCollecting_Node/data')
+        return dir_path
 
     @staticmethod
     def roi_crop(image, height, width):
@@ -41,18 +49,18 @@ class ImageCollector:
             img_list = [road, sign]
 
             if self.save_flag is True:
-                if self.file_count %  5 == 0:
+                if self.file_count % 30 == 0:
                     self.cb_image_save(img_list)
                     self.file_count = 0
                 self.file_count += 1
-            self.pb_image(img_list)
+            self.fn_publish_roi(img_list)
 
-    def pb_image(self, img_list):
+    def fn_publish_roi(self, img_list):
         for i in range(2):
             img_list[i] = self.cvb.cv2_to_imgmsg(img_list[i], encoding="bgr8")
-        self.roi_msg.road_image = img_list[0]
-        self.roi_msg.sign_image = img_list[1]
-        self.pub_image_roi.publish(self.roi_msg)
+        self.msg_roi.road_image = img_list[0]
+        self.msg_roi.sign_image = img_list[1]
+        self.pub_img_roi.publish(self.msg_roi)
 
     @staticmethod
     def main():
@@ -60,5 +68,5 @@ class ImageCollector:
 
 if __name__ == '__main__':
     rospy.init_node('ImageCollecting_Node')
-    node = ImageCollector()
+    node = ImageCollectingNode()
     node.main()
