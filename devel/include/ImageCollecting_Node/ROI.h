@@ -46,6 +46,7 @@ struct ROI_
 
 
 
+
   typedef boost::shared_ptr< ::ImageCollecting_Node::ROI_<ContainerAllocator> > Ptr;
   typedef boost::shared_ptr< ::ImageCollecting_Node::ROI_<ContainerAllocator> const> ConstPtr;
 

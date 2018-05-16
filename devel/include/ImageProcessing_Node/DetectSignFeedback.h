@@ -44,6 +44,7 @@ struct DetectSignFeedback_
 
 
 
+
   typedef boost::shared_ptr< ::ImageProcessing_Node::DetectSignFeedback_<ContainerAllocator> > Ptr;
   typedef boost::shared_ptr< ::ImageProcessing_Node::DetectSignFeedback_<ContainerAllocator> const> ConstPtr;
 

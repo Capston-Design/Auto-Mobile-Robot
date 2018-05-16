@@ -52,6 +52,7 @@ struct DetectSignAction_
 
 
 
+
   typedef boost::shared_ptr< ::ImageProcessing_Node::DetectSignAction_<ContainerAllocator> > Ptr;
   typedef boost::shared_ptr< ::ImageProcessing_Node::DetectSignAction_<ContainerAllocator> const> ConstPtr;
 

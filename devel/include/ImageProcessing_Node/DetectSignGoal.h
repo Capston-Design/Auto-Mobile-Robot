@@ -40,6 +40,7 @@ struct DetectSignGoal_
 
 
 
+
   typedef boost::shared_ptr< ::ImageProcessing_Node::DetectSignGoal_<ContainerAllocator> > Ptr;
   typedef boost::shared_ptr< ::ImageProcessing_Node::DetectSignGoal_<ContainerAllocator> const> ConstPtr;
 

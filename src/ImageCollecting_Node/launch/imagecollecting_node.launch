@@ -12,7 +12,7 @@
     </group>
 
     <group ns="Mission_Node">
-        <node name="LaneMission" pkg="Mission_Node" type="lane_mission.py" />
+        <node name="MissionNode" pkg="Mission_Node" type="mission_node.py" />
     </group>
 
     <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" />

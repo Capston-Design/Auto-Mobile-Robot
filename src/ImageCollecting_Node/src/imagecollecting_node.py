@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from ImageCollecting_Node.msg import ROI
@@ -44,7 +45,7 @@ class ImageCollectingNode:
             print(e)
         else:
             height, width, __ = cv2_img.shape
-            road = self.roi_crop(cv2_img, (height - 200, height - 100), (0, width))
+            road = self.roi_crop(cv2_img, (height // 2, height), (0, width))
             sign = self.roi_crop(cv2_img, (height - 400, height - 200), (0, width))
             img_list = [road, sign]
 
