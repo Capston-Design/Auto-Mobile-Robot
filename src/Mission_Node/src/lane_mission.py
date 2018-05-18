@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from geometry_msgs.msg import Twist
-
+import rospy
 
 class LaneMission:
     def __init__(self, msg):
         self.twist = Twist()
 
-        self.kp = 0.002
-        self.ki = 0
-        self.kd = 0.0003
-        self.dt = 0.1
-        self.max_vel = 0.2
+        self.kp = rospy.get_param("~mission/lane/kp")
+        self.ki = rospy.get_param("~mission/lane/ki")
+        self.kd = rospy.get_param("~mission/lane/kd")
+        self.dt = rospy.get_param("~mission/lane/dt")
+        self.max_vel = rospy.get_param("~mission/lane/max_vel")
 
-        self.last_err = 03
+        self.last_err = 0
         self.sum_err = 0
 
     def fn_pid_control(self, err):

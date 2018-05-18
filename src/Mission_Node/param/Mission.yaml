@@ -1,0 +1,7 @@
+mission:
+    lane:
+        kp : 0.002
+        ki : 0
+        kd : 0.0003
+        dt : 0.1
+        max_vel : 0.2

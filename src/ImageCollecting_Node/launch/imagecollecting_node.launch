@@ -1,19 +1,8 @@
 <launch>
     <node name="UVC_Camera" pkg="uvc_camera" type="uvc_camera_node" />
     <node name="ImageCollector" pkg="ImageCollecting_Node" type="imagecollecting_node.py" />
-
-    <group ns="Control_Node">
-           <node name="Controller" pkg="Control_Node" type="control_node.py" />
-    </group>
-
-    <group ns="ImageProcessing_Node">
-        <node name="SignProcessServer" pkg="ImageProcessing_Node" type="signprocess_server.py" />
-        <node name="LaneProcessServer" pkg="ImageProcessing_Node" type="laneprocess_server.py" />
-    </group>
-
-    <group ns="Mission_Node">
-        <node name="MissionNode" pkg="Mission_Node" type="mission_node.py" />
-    </group>
-
+    <include file="$(find Control_Node)/launch/control_node.launch" />
+    <include file="$(find ImageProcessing_Node)/launch/imageprocessing_node.launch" />
+    <include file="$(find Mission_Node)/launch/mission_node.launch" />
     <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" />
 </launch>

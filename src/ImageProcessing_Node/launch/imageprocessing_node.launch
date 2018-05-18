@@ -1,0 +1,6 @@
+<launch>
+    <group ns="ImageProcessing_Node">
+        <node name="SignProcessServer" pkg="ImageProcessing_Node" type="signprocess_server.py" />
+        <node name="LaneProcessServer" pkg="ImageProcessing_Node" type="laneprocess_server.py" />
+    </group>
+</launch>
