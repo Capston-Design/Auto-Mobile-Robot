@@ -6,71 +6,7 @@ import cv2
 
 class ImageProcessor:
     def __init__(self):
-        self.height, self.width = 0, 0
-        self.ratio_w, self.ratio_h = 300, 350
-        self.list_pos_pre, self.list_pos = [], []
-
-    def perspective_transform(self, image):
-        mask_line = self.hsv_filter(image)
-        img_line = cv2.bitwise_and(image, image, mask=mask_line)
-
-        self.height, self.width = img_line.shape[:2]
-
-        val_left_w0 = 0
-        val_left_h0 = int(self.height / 4)
-        img_left = img_line[val_left_h0: val_left_h0 + (int(self.height/2)),
-                            val_left_w0: val_left_w0 + (int(self.width / 2))]
-
-        val_right_w0 = int(self.width / 2)
-        val_right_h0 = int(self.height / 4)
-        img_right = img_line[val_right_h0: val_right_h0 + (int(self.height / 2)),
-                             val_right_w0: val_right_w0 + (int(self.width/2))]
-
-        img_left_edges = cv2.Canny(img_left, 80, 180)
-        img_right_edges = cv2.Canny(img_right, 80, 180)
-
-        list_hough_left = cv2.HoughLines(img_left_edges, 1, np.pi/180, 30)
-        list_hough_right = cv2.HoughLines(img_right_edges, 1, np.pi/180, 30)
-
-        list_left_x0 = [rho * np.cos(theta) for [[rho, theta]] in list_hough_left[:2]]
-        idx_left = list_left_x0.index(max(list_left_x0))
-        [[rho, theta]] = list_hough_left[idx_left]
-        line_left = self.hough_pos(rho, theta, val_left_w0, val_left_h0, self.height)
-
-        list_right_x0 = [rho * np.cos(theta) for [[rho, theta]] in list_hough_right[:2]]
-        idx_right = list_right_x0.index(min(list_right_x0))
-        [[rho, theta]] = list_hough_right[idx_right]
-        line_right = self.hough_pos(rho, theta, val_right_w0, val_right_h0, self.height)
-
-        x_mid = (line_left[0][0] + line_right[0][0] + line_left[1][0] + line_right[1][0]) // 4 * 1.2
-        x_width = ((line_left[1][1] + line_right[1][1]) - (line_left[0][1] + line_right[0][1])) * self.ratio_w // (4 * self.ratio_h) * 2
-
-        pos1_pre = [line_left[0][0], line_left[0][1]]
-        pos1 = [x_mid - x_width, line_left[0][1] * 2]
-        pos2_pre = [line_left[1][0], line_left[1][1]]
-        pos2 = [x_mid - x_width, line_left[1][1] * 2]
-        pos3_pre = [line_right[0][0], line_right[0][1]]
-        pos3 = [x_mid + x_width, line_right[0][1] * 2]
-        pos4_pre = [line_right[1][0], line_right[1][1]]
-        pos4 = [x_mid + x_width, line_right[1][1] * 2]
-
-        self.list_pos_pre = [pos1_pre, pos2_pre, pos3_pre, pos4_pre]
-        self.list_pos = [pos1, pos2, pos3, pos4]
-        return self.list_pos_pre, self.list_pos
-
-    @staticmethod
-    def hough_pos(rho, theta, w0, h0, height):
-        c_theta = np.cos(theta)
-        s_theta = np.sin(theta)
-        x0 = w0 + c_theta*rho
-        y0 = h0 + s_theta*rho
-        r1 = y0 // c_theta
-        r2 = (height - y0) // c_theta
-        upper_x = int(x0 - r1 * (-s_theta))
-        upper_y = int(y0 - r1 * c_theta)
-        lower_x = int(x0 + r2 * (-s_theta))
-        lower_y = int(y0 + r2 * c_theta)
-        return [[upper_x, upper_y], [lower_x, lower_y]]
+        pass
 
     @staticmethod
     def hsv_filter(image):
@@ -78,14 +14,81 @@ class ImageProcessor:
 
         # HSV_White color  [0,0,200] [255,255,255]
         # HSV_White color  [70,10,130] [180,110,255]
-        lower_white = np.array([0, 0, 230], np.uint8)
+        lower_white = np.array([0, 0, 2220], np.uint8)
         upper_white = np.array([255, 255, 255], np.uint8)
         mask_w = cv2.inRange(hsv, lower_white, upper_white)
 
         # HSV_Yellow color [20,100,100] [30,255,255]
-        lower_yellow = np.array([20, 100, 100], np.uint8)
-        upper_yellow = np.array([30, 255, 255], np.uint8)
+        lower_yellow = np.array([15, 100, 100], np.uint8)
+        upper_yellow = np.array([35, 255, 255], np.uint8)
         mask_y = cv2.inRange(hsv, lower_yellow, upper_yellow)
 
         mask_line = cv2.add(mask_w, mask_y)
         return mask_line
+
+    @staticmethod
+    def trans_perspective(image, pos_ori, pos_trans):
+        val_ori_h, val_ori_w = image.shape[:2]
+        arr_pos_ori = np.float32(pos_ori)
+        arr_pos_trans = np.float32(pos_trans)
+        mat_perspective = cv2.getPerspectiveTransform(arr_pos_ori, arr_pos_trans)
+        img_trans = cv2.warpPerspective(image, mat_perspective, (int(val_ori_w * 1.2), val_ori_h * 2))
+        return img_trans
+
+    @staticmethod
+    def end_in_search(image, per_low, per_high):
+        val_height, val_width = image.shape[:2]
+        img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        array_hist = [0] * 256
+
+        for jj in range(val_height):
+            for ii in range(val_height):
+                intensity = img_gray[jj, ii]
+                array_hist[intensity] += 1
+        #array_hist = cv2.calcHist(img_gray, [0], None, [256], [0, 256])
+        npix = val_height * val_width
+
+        sum_low_pix = 0
+        sum_high_pix = 0
+        hist_low = 0
+        hist_high = 255
+
+        for ii in range(256):
+            sum_low_pix += array_hist[ii]
+            print (sum_low_pix)
+            if sum_low_pix > npix * per_low / 100:
+                hist_low = ii
+                break
+
+        for ii in range(256):
+            sum_high_pix += array_hist[255-ii]
+            print (sum_high_pix)
+            if sum_high_pix > npix * per_high / 100:
+                hist_high = ii
+                break
+
+        return (hist_low, hist_high)
+
+    @staticmethod
+    def create_stretch_LUT(low, high):
+        print(low, high)
+        LUT = []
+        LUT.extend([0] * low)
+        LUT.extend([int((x - low) / (high - low) * 255) for x in range(low, high)])
+        LUT.extend([255] * (256 - high))
+        return LUT
+
+    @staticmethod
+    def const_stretching(image, LUT):
+        val_height, val_width = image.shape[:2]
+        image_stretch = np.zeros_like(image)
+        print(LUT)
+        for jj in range(val_height):
+            for ii in range(val_height):
+                for col in range(3):
+                    image.itemset((jj,ii,0),r[NDVI[i,j]][3])
+                    image.itemset((jj,ii,1),r[NDVI[i,j]][2])
+                    image.itemset((jj,ii,2),r[NDVI[i,j]][1])
+                    image_stretch[jj, ii, col] = LUT(image[jj, ii, col])
+        return image_stretch

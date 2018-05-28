@@ -52,6 +52,7 @@ class ControlNode:
         self.pub_bool_mission.publish(msg)
 
     def cb_error_receive(self, msg):
+        rospy.loginfo("ERROR : " + str(msg.data))
         self.pub_error_lane.publish(msg)
 
     # TODO: 수정이 필요
