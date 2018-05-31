@@ -11,8 +11,8 @@ import rospy
 class LaneDetector:
     def __init__(self):
         # Perspective 변환에 필요한 초기좌표
-        self.list_pos_ori = [[220, 0], [0, 240], [460, 0], [680, 240]]
-        self.list_pos_trans = [[212, 0], [212, 480], [620, 0], [620, 480]]
+        self.list_pos_ori = [[100, 0], [0, 192], [665, 0], [765, 192]]
+        self.list_pos_trans = [[105, 0], [200, 400], [795, 0], [700, 400]]
 
         # Center 에서 가장 가까운 점들의 정보리스트
         self.distance_info_left, self.distance_info_right, self.left_min, self.right_min = [], [], [], []
@@ -32,16 +32,6 @@ class LaneDetector:
         self.ori_img = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         self.ori_height, self.ori_width = self.ori_img.shape[:2]
 
-        # Perspective 이미지 관련 변수
-        self.p_img = self._fn_perspective(self.ori_img, self.list_pos_ori, self.list_pos_trans)
-        self.p_height, self.p_width = self.p_img.shape[:2]
-
-        # Center 이미지 관련 변수
-        self.center_img = self._set_center()
-
-        # Line 이미지 관련 변수
-        self.num_of_section = 40
-        self.line_img = self._set_line()
         self.run()
 
     def _set_center(self):
@@ -65,28 +55,37 @@ class LaneDetector:
         self.right_min = []
 
     def _fn_common_dot(self, img):
-        dot_img = img.copy()
         for h in range(0, self.p_height):
             for w in range(0, self.p_width):
                 distance = self.p_width // 2 - w
-                if self.line_img[h, w] != 0 and dot_img[h, w] != 0:
+                if self.line_img[h, w] != 0 and img[h, w] != 0:
                     if distance > self.noise_filter:
                         self.distance_info_left.append([h, w, abs(self.p_width // 2 - w)])
-                        dot_img[h, w] = 255
+                        # img[h, w] = 255
                     elif distance < -self.noise_filter:
                         self.distance_info_right.append([h, w, abs(self.p_width // 2 - w)])
-                        dot_img[h, w] = 255
+                        # img[h, w] = 255
                     else:
-                        dot_img[h, w] = 0
+                        # img[h, w] = 0
+                        pass
                 else:
-                    dot_img[h, w] = 0
-        dot_img = cv2.cvtColor(dot_img, cv2.COLOR_GRAY2BGR)
+                    # img[h, w] = 0
+                    pass
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
         # Dot 이미지 중에서 중앙선과 최소거리를 가지는 점의 정보만 리스트에 저장
         self._fn_min_distance(self.distance_info_left, self.left_min)
         self._fn_min_distance(self.distance_info_right, self.right_min)
 
-        return dot_img
+        res = np.zeros((self.p_height, self.p_width, 3), 'uint8')
+        for num in range(0, len(self.left_min)):
+            # cv2.circle(res, (self.distance_info_min[num][0], self.distance_info_min[num][1]), 1, (0, 255, 0), -1)
+            res[self.left_min[num][0]][self.left_min[num][1]] = 255
+        for num in range(0, len(self.right_min)):
+            # cv2.circle(res, (self.distance_info_min[num][0], self.distance_info_min[num][1]), 1, (0, 255, 0), -1)
+            res[self.right_min[num][0]][self.right_min[num][1]] = 255
+
+        return res
 
     def _fn_perspective(self, img, pos_ori, pos_trans):
         arr_pos_ori = np.float32(pos_ori)
@@ -114,18 +113,21 @@ class LaneDetector:
                 distance = pre_h
 
     def run(self):
-        gray = cv2.cvtColor(self.p_img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(self.ori_img, cv2.COLOR_BGR2GRAY)
         __, threshold = cv2.threshold(gray, 160, 255, cv2.THRESH_BINARY)
         canny = cv2.Canny(threshold, 150, 200, apertureSize=7)
 
-        dot = self._fn_common_dot(canny)
-        res = np.zeros((self.p_height, self.p_width, 3), 'uint8')
-        for num in range(0, len(self.left_min)):
-            # cv2.circle(res, (self.distance_info_min[num][0], self.distance_info_min[num][1]), 1, (0, 255, 0), -1)
-            res[self.left_min[num][0]][self.left_min[num][1]] = 255
-        for num in range(0, len(self.right_min)):
-            # cv2.circle(res, (self.distance_info_min[num][0], self.distance_info_min[num][1]), 1, (0, 255, 0), -1)
-            res[self.right_min[num][0]][self.right_min[num][1]] = 255
+        # Perspective 이미지 관련 변수
+        self.p_img = self._fn_perspective(canny, self.list_pos_ori, self.list_pos_trans)
+        self.p_height, self.p_width = self.p_img.shape[:2]
+
+        # Center 이미지 관련 변수
+        self.center_img = self._set_center()
+
+        # Line 이미지 관련 변수
+        self.num_of_section = 70
+        self.line_img = self._set_line()
+        dot = self._fn_common_dot(self.p_img)
 
         left_x, left_y = [], []
         for num in range(0, len(self.left_min)):
@@ -137,28 +139,32 @@ class LaneDetector:
             right_x.append(self.right_min[num][0])
             right_y.append(self.right_min[num][1])
 
-        arr_y = np.linspace(0, self.p_height - 1, self.p_height)
+        if len(left_x) > 5 and len(left_y) > 5:
+            arr_y = np.linspace(0, self.p_height - 1, self.p_height)
 
-        left = np.polyfit(left_x, left_y, 2)
-        arr_left_x = left[0] * arr_y ** 2 + left[1] * arr_y + left[2]
-        arr_pts = np.array([np.transpose(np.vstack([arr_left_x, arr_y]))])
-        cv2.polylines(res, np.int_([arr_pts]), isClosed=False, color=(0, 255, 0), thickness=1)
+            left = np.polyfit(left_x, left_y, 2)
+            arr_left_x = left[0] * arr_y ** 2 + left[1] * arr_y + left[2]
+            arr_pts = np.array([np.transpose(np.vstack([arr_left_x, arr_y]))])
+            cv2.polylines(dot, np.int_([arr_pts]), isClosed=False, color=(255, 255, 0), thickness=1)
 
-        right = np.polyfit(right_x, right_y, 2)
-        arr_right_x = right[0] * arr_y ** 2 + right[1] * arr_y + right[2]
-        arr_pts = np.array([np.transpose(np.vstack([arr_right_x, arr_y]))])
-        cv2.polylines(res, np.int_([arr_pts]), isClosed=False, color=(0, 255, 0), thickness=1)
+            right = np.polyfit(right_x, right_y, 2)
+            arr_right_x = right[0] * arr_y ** 2 + right[1] * arr_y + right[2]
+            arr_pts = np.array([np.transpose(np.vstack([arr_right_x, arr_y]))])
+            cv2.polylines(dot, np.int_([arr_pts]), isClosed=False, color=(255, 255, 0), thickness=1)
 
-        dot_center = cv2.add(self.center_img, res)
-        result = cv2.add(self.p_img, dot_center)
+            dot_center = cv2.add(self.center_img, dot)
+            # result = cv2.add(self.p_img, dot_center)
 
-        c = self.bridge.cv2_to_imgmsg(canny, encoding="mono8")
-        self.canny_pub.publish(c)
-        d = self.bridge.cv2_to_imgmsg(dot_center, encoding="bgr8")
-        self.dot_pub.publish(d)
+            c = self.bridge.cv2_to_imgmsg(canny, encoding="mono8")
+            self.canny_pub.publish(c)
+            d = self.bridge.cv2_to_imgmsg(dot_center, encoding="bgr8")
+            self.dot_pub.publish(d)
 
-        msg = self.bridge.cv2_to_imgmsg(result, encoding="bgr8")
-        self.image_pub.publish(msg)
+            # msg = self.bridge.cv2_to_imgmsg(result, encoding="bgr8")
+            # self.image_pub.publish(msg)
+        else:
+            rospy.logerr("Line Error")
+
         self._fn_init_setting()
 
     @staticmethod
