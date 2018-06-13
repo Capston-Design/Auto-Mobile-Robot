@@ -7,11 +7,11 @@ class LaneMission:
     def __init__(self, msg):
         self.twist = Twist()
 
-        self.kp = rospy.get_param("~mission/lane/kp")
-        self.ki = rospy.get_param("~mission/lane/ki")
-        self.kd = rospy.get_param("~mission/lane/kd")
-        self.dt = rospy.get_param("~mission/lane/dt")
-        self.max_vel = rospy.get_param("~mission/lane/max_vel")
+        self.kp = rospy.get_param("mission/lane/kp")
+        self.ki = rospy.get_param("mission/lane/ki")
+        self.kd = rospy.get_param("mission/lane/kd")
+        self.dt = rospy.get_param("mission/lane/dt")
+        self.max_vel = rospy.get_param("mission/lane/max_vel")
 
         self.last_err = 0
         self.sum_err = 0

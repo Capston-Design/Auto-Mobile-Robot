@@ -20,7 +20,7 @@ class MissionNode:
 
     def cb_error_receive(self, msg):
         lm = LaneMission(msg)
-        twist_msg = lm.fn_pid_control(msg)
+        twist_msg = lm.fn_pid_control(msg.data)
         self.pub_value_lane.publish(twist_msg)
 
     @staticmethod

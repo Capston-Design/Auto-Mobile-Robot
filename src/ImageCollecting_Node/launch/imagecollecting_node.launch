@@ -1,7 +1,11 @@
 <launch>
+    <node name="UVC_Camera" pkg="uvc_camera" type="uvc_camera_node">
+        <param name="width" value="320" />
+        <param name="height" value="240" />
+        <param name="fps" value="100"/>
+    </node>
     <node name="ImageCollector" pkg="ImageCollecting_Node" type="imagecollecting_node.py" />
     <include file="$(find Control_Node)/launch/control_node.launch" />
     <include file="$(find ImageProcessing_Node)/launch/imageprocessing_node.launch" />
     <include file="$(find Mission_Node)/launch/mission_node.launch" />
-    <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" />
 </launch>

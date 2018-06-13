@@ -45,8 +45,8 @@ class ImageCollectingNode:
             print(e)
         else:
             height, width, __ = cv2_img.shape
-            road = self.roi_crop(cv2_img, (height // 2, height), (0, width))
-            sign = self.roi_crop(cv2_img, (height - 400, height - 200), (0, width))
+            road = self.roi_crop(cv2_img, (height // 2 + 80, height), (0, width))
+            sign = self.roi_crop(cv2_img, (0, height // 2 + 80), (0, width))
             img_list = [road, sign]
 
             if self.save_flag is True:

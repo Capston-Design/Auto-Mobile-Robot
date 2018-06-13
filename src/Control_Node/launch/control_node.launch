@@ -1,5 +1,5 @@
 <launch>
     <group ns="Control_Node">
-        <node name="Controller" pkg="Control_Node" type="control_node.py" />
+        <node name="Controller" pkg="Control_Node" type="control_node.py" output="screen" />
     </group>
 </launch>
