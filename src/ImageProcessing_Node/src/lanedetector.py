@@ -19,7 +19,7 @@ class LaneDetector:
         self.__trans_position = np.float32([[50, 0], [40, 99], [420, 0], [440, 99]])
 
         # 차선 예외처리 관련 변수
-        self.__lane_to_center = self.__src_width // 2 - 80
+        self.__lane_to_center = self.__src_width // 2 - 20
 
         # 이미지 처리과정을 보여주는 변수
         self.process = []

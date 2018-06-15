@@ -4,22 +4,23 @@ from lanedetector import LaneDetector
 from std_msgs.msg import Float32
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
-import numpy as np
-import cv2
 import rospy
 import time
 
 
 class LaneProcessServer:
     def __init__(self):
-        # Test
+        # FPS 연산에 사용하는 변수
         self.prev_time = 0
 
+        # 외부에서 이미지를 받아오는 설정
         self.cvb = CvBridge()
-        self.lane = LaneDetector((40, 320))
+        self.lane = LaneDetector((60, 320))
 
         self.image_sub = rospy.Subscriber('/image/controller/lane', Image, self.image_callback, queue_size=1)
-        self.error_pub = rospy.Publisher('/error/image_processor/lane', Float32, queue_size=1)
+        self.error_pub = rospy.Publisher('/error/lane_processor/lane', Float32, queue_size=1)
+        self.image_pub = rospy.Publisher('/image/lane_processor/lane', Image, queue_size=1)
+        self.pers_pub = rospy.Publisher('/image/lane_processor/perspective', Image, queue_size=1)
 
     def image_callback(self, msg):
         img_ori = self.cvb.imgmsg_to_cv2(msg, desired_encoding='bgr8')
@@ -30,12 +31,13 @@ class LaneProcessServer:
         self.prev_time = cur_time
 
         error = self.lane(img_ori, f)
-        for process in self.lane.process:
-            cv2.imshow(process[0], process[1])
-        del self.lane.process[:]
-        cv2.waitKey(1)
 
+        msg = self.cvb.cv2_to_imgmsg(self.lane.process[6][1], encoding='bgr8')
+        pers = self.cvb.cv2_to_imgmsg(self.lane.process[5][1], encoding='mono8')
         self.error_pub.publish(float(error))
+        self.image_pub.publish(msg)
+        self.pers_pub.publish(pers)
+        del self.lane.process[:]
 
     @staticmethod
     def main():

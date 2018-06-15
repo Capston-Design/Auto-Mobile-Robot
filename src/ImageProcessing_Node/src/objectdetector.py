@@ -12,9 +12,9 @@ class ObjectDetector:
         self.__path = "/home/au-di/Auto-Mobile-Robot/src/ImageProcessing_Node/data"
 
         # 영상에서 찾고자하는 물체이미지를 저장한 변수
-        self.__obj_image = dict(traffic=cv2.imread(self.__path + "/card1.jpg"),
-                                parking=cv2.imread(self.__path + "/card2.jpg"),
-                                crossbar=cv2.imread(self.__path + "/card3.jpg"),
+        self.__obj_image = dict(traffic=cv2.imread(self.__path + "/traffic.png"),
+                                parking=cv2.imread(self.__path + "/parking.png"),
+                                crossbar=cv2.imread(self.__path + "/crossbar.png"),
                                 tunnel=cv2.imread(self.__path + "/card4.jpg"))
 
         # 물체이미지에 관한 정보를 담는 변수
@@ -63,7 +63,7 @@ class ObjectDetector:
         good = dict(good1=[], good2=[], good3=[], good4=[])
         for key in matches:
             for m, n in matches[key]:
-                if m.distance < 0.55 * n.distance:
+                if m.distance < 0.7 * n.distance:
                     if key == 'match1':
                         good['good1'].append(m)
                     elif key == 'match2':
@@ -75,7 +75,7 @@ class ObjectDetector:
                     else:
                         return
 
-        result = src
+        result = [src, None]
         if len(good['good1']) > 7:
             src_pts = np.float32([src_kp[m.queryIdx].pt for m in good['good1']]).reshape(-1, 1, 2)
             dst_pts = np.float32([self.__kp['kp1'][m.trainIdx].pt for m in good['good1']]).reshape(-1, 1, 2)
@@ -85,8 +85,8 @@ class ObjectDetector:
             mse = sum / num_all
             if mse < 40000:
                 print("Traffic Sign Detect")
-                result = cv2.drawMatches(src, src_kp, self.__obj_image['traffic'], self.__kp['kp1'],
-                                         good['good1'], None, flags=2)
+                result = [cv2.drawMatches(src, src_kp, self.__obj_image['traffic'], self.__kp['kp1'],
+                                         good['good1'], None, flags=2), 'traffic']
 
         elif len(good['good2']) > 7:
             src_pts = np.float32([src_kp[m.queryIdx].pt for m in good['good2']]).reshape(-1, 1, 2)
@@ -97,8 +97,8 @@ class ObjectDetector:
             mse = sum / num_all
             if mse < 40000:
                 print("Parking Sign Detect")
-                result = cv2.drawMatches(src, src_kp, self.__obj_image['parking'], self.__kp['kp2'],
-                                         good['good2'], None, flags=2)
+                result = [cv2.drawMatches(src, src_kp, self.__obj_image['parking'], self.__kp['kp2'],
+                                         good['good2'], None, flags=2), 'parking']
 
         elif len(good['good3']) > 7:
             src_pts = np.float32([src_kp[m.queryIdx].pt for m in good['good3']]).reshape(-1, 1, 2)
@@ -109,8 +109,8 @@ class ObjectDetector:
             mse = sum / num_all
             if mse < 40000:
                 print("Crossbar Detect")
-                result = cv2.drawMatches(src, src_kp, self.__obj_image['crossbar'], self.__kp['kp3'],
-                                         good['good3'], None, flags=2)
+                result = [cv2.drawMatches(src, src_kp, self.__obj_image['crossbar'], self.__kp['kp3'],
+                                         good['good3'], None, flags=2), 'crossbar']
 
         elif len(good['good4']) > 7:
             src_pts = np.float32([src_kp[m.queryIdx].pt for m in good['good4']]).reshape(-1, 1, 2)
@@ -121,10 +121,10 @@ class ObjectDetector:
             mse = sum / num_all
             if mse < 40000:
                 print("Tunnel Sign Detect")
-                result = cv2.drawMatches(src, src_kp, self.__obj_image['tunnel'], self.__kp['kp4'],
-                                         good['good4'], None, flags=2)
+                result = [cv2.drawMatches(src, src_kp, self.__obj_image['tunnel'], self.__kp['kp4'],
+                                         good['good4'], None, flags=2), 'tunnel']
         fps = "FPS : %0.1f" % fps
-        result = cv2.putText(result, fps, (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        result[0] = cv2.putText(result[0], fps, (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         return result
 
 

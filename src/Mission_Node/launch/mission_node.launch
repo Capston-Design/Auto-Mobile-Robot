@@ -1,6 +1,6 @@
 <launch>
     <group ns="Mission_Node">
-        <node name="MissionNode" pkg="Mission_Node" type="mission_node.py" />
+        <node name="MissionNode" pkg="Mission_Node" type="mission_node.py" output="screen" />
             <rosparam command="load" file="$(find Mission_Node)/param/Mission.yaml" />
         <node name="Amcl" pkg="amcl" type="amcl" />
         <node name="Map_Server" pkg="map_server" type="map_server" />
